@@ -1,0 +1,19 @@
+{
+  "name": "passport-oauth-access-token",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aliatsis/passport-oauth-access-token.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aliatsis/passport-oauth-access-token/issues"
+  },
+  "homepage": "https://github.com/aliatsis/passport-oauth-access-token#readme",
+  "dependencies": {
+    "bluebird": "~2.10.1",
+    "request-promise": "~0.4.3",
+    "util": "~0.10.3"
+  }
+}
