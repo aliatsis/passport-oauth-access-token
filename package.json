@@ -13,6 +13,7 @@
   "homepage": "https://github.com/aliatsis/passport-oauth-access-token#readme",
   "dependencies": {
     "bluebird": "~2.10.1",
+    "passport-strategy": "~1.0.0",
     "request-promise": "~0.4.3"
   }
 }
