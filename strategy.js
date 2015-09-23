@@ -88,11 +88,15 @@ function validateAccessToken(oAuthProvider, accessToken, options) {
     case 'facebook':
       return validateFacebookAccessToken(accessToken, options);
     default:
-      return Promise.reject('Unknown OAuth Provider');
+      return Promise.reject('Unknown OAuth Provider: ' + oAuthProvider);
   }
 }
 
 function validateGoogleAccessToken(accessToken, options) {
+  if (!options.googleClientId) {
+    return Promise.reject(new Error('Missing Google Client ID'));
+  }
+
   return rp({
     uri: 'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=' + accessToken,
     method: 'POST'
@@ -106,6 +110,14 @@ function validateGoogleAccessToken(accessToken, options) {
 }
 
 function validateFacebookAccessToken(accessToken, options) {
+  if (!options.facebookClientId) {
+    return Promise.reject(new Error('Missing Facebook Client ID'));
+  }
+
+  if (!options.facebookClientSecret) {
+    return Promise.reject(new Error('Missing Facebook Client Secret'));
+  }
+
   var masterToken = options.facebookClientId + '|' + options.facebookClientSecret;
   var uri = 'https://graph.facebook.com/v2.4/debug_token?input_token=' + accessToken + '&access_token=' + masterToken;
 
