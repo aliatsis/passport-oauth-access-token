@@ -43,22 +43,21 @@ util.inherits(Strategy, passport.Strategy);
  */
 Strategy.prototype.authenticate = function(req, options) {
   options = options || {};
-  var oAuthProvider = lookup(req.body, this._oAuthProviderField) || lookup(req.query, this._oAuthProviderField);
-  var accessToken = lookup(req.body, this._accessTokenField) || lookup(req.query, this._accessTokenField);
+  var self = this;
+  var oAuthProvider = lookup(req.body, self._oAuthProviderField) || lookup(req.query, self._oAuthProviderField);
+  var accessToken = lookup(req.body, self._accessTokenField) || lookup(req.query, self._accessTokenField);
 
   if (!oAuthProvider) {
-    return this.fail({
+    return self.fail({
       message: options.badRequestMessage || 'Missing OAuth Provider Name'
     }, 400);
   }
 
   if (!accessToken) {
-    return this.fail({
+    return self.fail({
       message: options.badRequestMessage || 'Missing Access Token'
     }, 400);
   }
-
-  var self = this;
 
   validateAccessToken.call(self, oAuthProvider, accessToken).then(function(oAuthUserId) {
     function verified(err, user, info) {
@@ -73,9 +72,9 @@ Strategy.prototype.authenticate = function(req, options) {
 
     try {
       if (self._passReqToCallback) {
-        this._verify(req, accessToken, oAuthUserId, verified);
+        self._verify(req, accessToken, oAuthUserId, verified);
       } else {
-        this._verify(accessToken, oAuthUserId, verified);
+        self._verify(accessToken, oAuthUserId, verified);
       }
     } catch (ex) {
       return self.error(ex);
