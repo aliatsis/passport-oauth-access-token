@@ -106,9 +106,9 @@ function validateGoogleAccessToken(accessToken) {
   return jsonRequest({
     uri: 'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=' + accessToken,
     method: 'POST'
-  }).then(function(res) {
-    if (res.data && res.data.audience === self._googleClientId) {
-      return res.data.user_id;
+  }).then(function(data) {
+    if (data && data.audience === self._googleClientId) {
+      return data.user_id;
     } else {
       return Promise.reject(new Error('Invalid Token'));
     }
@@ -129,9 +129,9 @@ function validateFacebookAccessToken(accessToken) {
   var masterToken = self._facebookClientId + '|' + self._facebookClientSecret;
   var uri = 'https://graph.facebook.com/v2.4/debug_token?input_token=' + accessToken + '&access_token=' + masterToken;
 
-  return jsonRequest(uri).then(function(res) {
-    if (res.data && res.data.is_valid && res.data.app_id === self._facebookClientId) {
-      return res.data.user_id;
+  return jsonRequest(uri).then(function(data) {
+    if (data && data.is_valid && data.app_id === self._facebookClientId) {
+      return data.user_id;
     } else {
       return Promise.reject(new Error('Invalid Token'));
     }
