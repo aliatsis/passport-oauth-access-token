@@ -128,9 +128,9 @@ function validateFacebookAccessToken(accessToken) {
   var masterToken = self._facebookClientId + '|' + self._facebookClientSecret;
   var uri = 'https://graph.facebook.com/v2.4/debug_token?input_token=' + accessToken + '&access_token=' + masterToken;
 
-  return jsonRequest(uri).then(function(data) {
-    if (data && data.is_valid && data.app_id === self._facebookClientId) {
-      return data.user_id;
+  return jsonRequest(uri).then(function(result) {
+    if (result && result.data && result.data.is_valid && result.data.app_id === self._facebookClientId) {
+      return result.data.user_id;
     } else {
       return Promise.reject(new Error('Invalid Token'));
     }
