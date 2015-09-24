@@ -103,7 +103,7 @@ function validateGoogleAccessToken(accessToken) {
     return Promise.reject(new Error('Missing Google Client ID'));
   }
 
-  return rp({
+  return jsonRequest({
     uri: 'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=' + accessToken,
     method: 'POST'
   }).then(function(res) {
@@ -129,13 +129,27 @@ function validateFacebookAccessToken(accessToken) {
   var masterToken = self._facebookClientId + '|' + self._facebookClientSecret;
   var uri = 'https://graph.facebook.com/v2.4/debug_token?input_token=' + accessToken + '&access_token=' + masterToken;
 
-  return rp(uri).then(function(res) {
+  return jsonRequest(uri).then(function(res) {
     if (res.data && res.data.is_valid && res.data.app_id === self._facebookClientId) {
       return res.data.user_id;
     } else {
       return Promise.reject(new Error('Invalid Token'));
     }
   });
+}
+
+function jsonRequest(reqData) {
+  return rp(reqData).then(parseBody);
+}
+
+function parseBody(body) {
+  try {
+    return Promise.resolve(JSON.parse(body));
+  } catch (e) {
+    return Promise.reject(
+      new Error(util.format('Parsing error: %s, body= \n %s', e.message, body))
+    );
+  }
 }
 
 /**
