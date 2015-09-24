@@ -20,6 +20,10 @@ function Strategy(options, verify) {
   this._oAuthProviderField = options.oAuthProviderField || 'oAuthProvider';
   this._accessTokenField = options.accessTokenField || 'accessToken';
 
+  this._googleClientId = options.googleClientId;
+  this._facebookClientId = options.facebookClientId;
+  this._facebookClientSecret = options.facebookClientSecret;
+
   passport.Strategy.call(this);
   this.name = 'oAuthAccessToken';
   this._verify = verify;
@@ -56,7 +60,7 @@ Strategy.prototype.authenticate = function(req, options) {
 
   var self = this;
 
-  validateAccessToken(oAuthProvider, accessToken, options).then(function(oAuthUserId) {
+  validateAccessToken.call(self, oAuthProvider, accessToken).then(function(oAuthUserId) {
     function verified(err, user, info) {
       if (err) {
         return self.error(err);
@@ -81,19 +85,21 @@ Strategy.prototype.authenticate = function(req, options) {
   });
 };
 
-function validateAccessToken(oAuthProvider, accessToken, options) {
+function validateAccessToken(oAuthProvider, accessToken) {
   switch (oAuthProvider) {
     case 'google':
-      return validateGoogleAccessToken(accessToken, options);
+      return validateGoogleAccessToken.call(this, accessToken);
     case 'facebook':
-      return validateFacebookAccessToken(accessToken, options);
+      return validateFacebookAccessToken.call(this, accessToken);
     default:
       return Promise.reject('Unknown OAuth Provider: ' + oAuthProvider);
   }
 }
 
-function validateGoogleAccessToken(accessToken, options) {
-  if (!options.googleClientId) {
+function validateGoogleAccessToken(accessToken) {
+  var self = this;
+
+  if (!self._googleClientId) {
     return Promise.reject(new Error('Missing Google Client ID'));
   }
 
@@ -101,7 +107,7 @@ function validateGoogleAccessToken(accessToken, options) {
     uri: 'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=' + accessToken,
     method: 'POST'
   }).then(function(res) {
-    if (res.data && res.data.audience === options.googleClientId) {
+    if (res.data && res.data.audience === self._googleClientId) {
       return res.data.user_id;
     } else {
       return Promise.reject(new Error('Invalid Token'));
@@ -109,20 +115,22 @@ function validateGoogleAccessToken(accessToken, options) {
   });
 }
 
-function validateFacebookAccessToken(accessToken, options) {
-  if (!options.facebookClientId) {
+function validateFacebookAccessToken(accessToken) {
+  var self = this;
+
+  if (!self._facebookClientId) {
     return Promise.reject(new Error('Missing Facebook Client ID'));
   }
 
-  if (!options.facebookClientSecret) {
+  if (!self._facebookClientSecret) {
     return Promise.reject(new Error('Missing Facebook Client Secret'));
   }
 
-  var masterToken = options.facebookClientId + '|' + options.facebookClientSecret;
+  var masterToken = self._facebookClientId + '|' + self._facebookClientSecret;
   var uri = 'https://graph.facebook.com/v2.4/debug_token?input_token=' + accessToken + '&access_token=' + masterToken;
 
   return rp(uri).then(function(res) {
-    if (res.data && res.data.is_valid && res.data.app_id === options.facebookClientId) {
+    if (res.data && res.data.is_valid && res.data.app_id === self._facebookClientId) {
       return res.data.user_id;
     } else {
       return Promise.reject(new Error('Invalid Token'));
